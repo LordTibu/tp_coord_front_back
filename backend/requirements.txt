@@ -83,6 +83,8 @@ packaging==24.2
     #   gunicorn
 psycopg2==2.9.10
     # via -r requirements.in
+pyjwt==2.10.1
+    # via -r requirements.in
 pytz==2024.2
     # via flask-restx
 pyyaml==6.0.2

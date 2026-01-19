@@ -14,6 +14,7 @@ import re
 import os
 
 from apps.base.models import Company, Product
+from apps.authentication.jwt import get_current_user_from_token
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -31,6 +32,8 @@ def to_pascal_case(s):
 
 
 def has_permission(model, method):
+    if method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+        return get_current_user_from_token() is not None
     return True
     # if method in ['POST', 'PATCH', 'DELETE']:
     #     return current_user.is_authenticated
@@ -51,6 +54,7 @@ def has_permission(model, method):
 def company(cmp_id=None):
     if not has_permission('Company', request.method):
         return "You need to be authenticated", 401
+    payload = request.get_json(silent=True) or request.form or {}
     if request.method == 'GET':
         filter_on_fields = {field for field in request.args if hasattr(Company, field)}
         qs = Company.query
@@ -64,8 +68,8 @@ def company(cmp_id=None):
             return jsonify(instance.serialize)
         else:
             return jsonify(data=[i.serialize for i in qs.all()])
-    if request.method == 'POST' and request.form:
-        name = request.form.get('name')
+    if request.method == 'POST' and payload:
+        name = payload.get('name')
         cmp_instance = Company(name=name)
         db.session.add(cmp_instance)
         db.session.commit()
@@ -85,6 +89,7 @@ def company(cmp_id=None):
 def product(product_id=None):
     if not has_permission('Product', request.method):
         return "You need to be authenticated", 401
+    payload = request.get_json(silent=True) or request.form or {}
     if request.method == 'GET':
         filter_on_fields = {field for field in request.args if hasattr(Product, field)}
         qs = Product.query
@@ -98,21 +103,21 @@ def product(product_id=None):
             return jsonify(instance.serialize)
         else:
             return jsonify(data=[i.serialize for i in qs.all()])
-    if request.method == 'POST' and request.form:
-        name = request.form.get('name')
-        comment = request.form.get('comment')
-        quantity = request.form.get('quantity')
-        company_id = request.form.get('company_id')
+    if request.method == 'POST' and payload:
+        name = payload.get('name')
+        comment = payload.get('comment')
+        quantity = payload.get('quantity')
+        company_id = payload.get('company_id')
         product_instance = Product(name=name, comment=comment, quantity=quantity, company_id=company_id)
         db.session.add(product_instance)
         db.session.commit()
         return jsonify(product_instance.serialize)
 
-    if request.method == 'PUT' and request.form:
+    if request.method in ['PUT', 'PATCH'] and payload:
         product_instance = Product.query.get_or_404(product_id)
-        product_instance.name = request.form.get('name') if request.form.get('name') else product_instance.name
-        product_instance.comment = request.form.get('comment') if request.form.get('comment') else product_instance.comment
-        product_instance.quantity = request.form.get('quantity') if request.form.get('quantity') else product_instance.quantity
+        product_instance.name = payload.get('name') if payload.get('name') else product_instance.name
+        product_instance.comment = payload.get('comment') if payload.get('comment') else product_instance.comment
+        product_instance.quantity = payload.get('quantity') if payload.get('quantity') else product_instance.quantity
 
         db.session.commit()
         return jsonify(product_instance.serialize)

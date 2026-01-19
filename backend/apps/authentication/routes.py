@@ -4,7 +4,8 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from apps.base.models.company import Company
-from flask import render_template, redirect, request, url_for, current_app
+from flask import render_template, redirect, request, url_for, jsonify
+from sqlalchemy import or_
 from flask_login import (
     current_user,
     login_user,
@@ -16,6 +17,7 @@ from apps.authentication import blueprint
 from apps.authentication.forms import LoginForm, CreateAccountForm
 
 from apps.authentication.util import verify_pass
+from apps.authentication.jwt import create_access_token, token_required
 
 from apps.authentication.models import Users
 from flasgger.utils import swag_from
@@ -57,6 +59,33 @@ def login():
     logout_user()
     return render_template('accounts/login.html',
                                form=login_form)
+
+
+@blueprint.route('/api/auth/login', methods=['POST'])
+def api_login():
+    payload = request.get_json(silent=True) or request.form or {}
+    identifier = payload.get('username')
+    password = payload.get('password')
+
+    if not identifier or not password:
+        return jsonify({'message': 'Missing username or password'}), 400
+
+    user = Users.query.filter(
+        or_(Users.username == identifier, Users.email == identifier)
+    ).first()
+
+    if not user or not verify_pass(password, user.password):
+        return jsonify({'message': 'Invalid credentials'}), 401
+
+    access_token = create_access_token(user)
+    return jsonify({'access_token': access_token, 'user': user.serialize})
+
+
+@blueprint.route('/api/auth/me', methods=['GET'])
+@token_required
+def api_me():
+    from flask import g
+    return jsonify({'user': g.current_user.serialize})
 
 
 @blueprint.route('/register', methods=['GET', 'POST'])

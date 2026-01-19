@@ -9,6 +9,9 @@ class Config(object):
     basedir = os.path.abspath(os.path.dirname(__file__))
 
     SECRET_KEY = os.getenv('SECRET_KEY', None)
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', None)
+    JWT_ALGORITHM = os.getenv('JWT_ALGORITHM', 'HS256')
+    JWT_EXPIRES_IN = int(os.getenv('JWT_EXPIRES_IN', '3600'))
 
     # CDN Support Settings 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
