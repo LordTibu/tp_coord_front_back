@@ -39,8 +39,15 @@ def has_permission(model, method):
     # return current_user.is_authenticated
 
 @blueprint.route('/company/', endpoint='company-without-id', methods=['GET'])
+@swag_from('swagger/company_without_id_specs.yml', endpoint='base_blueprint.company-without-id', methods=['GET'])
 @blueprint.route('/company/<int:cmp_id>', endpoint='company-with-id', methods=['GET'])
+@swag_from('swagger/company_with_id_specs.yml', endpoint='base_blueprint.company-with-id', methods=['GET'])
 @blueprint.route('/company/', endpoint='company-create', methods=['POST'])
+@swag_from('swagger/company_create_specs.yml', endpoint='base_blueprint.company-create', methods=['POST'])
+@blueprint.route('/company/<int:cmp_id>', endpoint='company-update', methods=['PUT', 'PATCH'])
+@swag_from('swagger/company_create_specs.yml', endpoint='base_blueprint.company-update', methods=['PUT', 'PATCH'])
+@blueprint.route('/company/<int:cmp_id>', endpoint='company-delete', methods=['DELETE'])
+@swag_from('swagger/company_with_id_specs.yml', endpoint='base_blueprint.company-delete', methods=['DELETE'])
 def company(cmp_id=None):
     if not has_permission('Company', request.method):
         return "You need to be authenticated", 401
@@ -91,21 +98,21 @@ def product(product_id=None):
             return jsonify(instance.serialize)
         else:
             return jsonify(data=[i.serialize for i in qs.all()])
-    if request.method == 'POST' and request.json:
-        name = request.json.get('name')
-        comment = request.json.get('comment')
-        quantity = request.json.get('quantity')
-        company_id = request.json.get('company_id')
+    if request.method == 'POST' and request.form:
+        name = request.form.get('name')
+        comment = request.form.get('comment')
+        quantity = request.form.get('quantity')
+        company_id = request.form.get('company_id')
         product_instance = Product(name=name, comment=comment, quantity=quantity, company_id=company_id)
         db.session.add(product_instance)
         db.session.commit()
         return jsonify(product_instance.serialize)
 
-    if request.method == 'PUT' and request.json:
+    if request.method == 'PUT' and request.form:
         product_instance = Product.query.get_or_404(product_id)
-        product_instance.name = request.json.get('name') if request.json.get('name') else product_instance.name
-        product_instance.comment = request.json.get('comment') if request.json.get('comment') else product_instance.comment
-        product_instance.quantity = request.json.get('quantity') if request.json.get('quantity') else product_instance.quantity
+        product_instance.name = request.form.get('name') if request.form.get('name') else product_instance.name
+        product_instance.comment = request.form.get('comment') if request.form.get('comment') else product_instance.comment
+        product_instance.quantity = request.form.get('quantity') if request.form.get('quantity') else product_instance.quantity
 
         db.session.commit()
         return jsonify(product_instance.serialize)

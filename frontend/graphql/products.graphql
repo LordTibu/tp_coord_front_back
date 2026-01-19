@@ -1,0 +1,15 @@
+query Products {
+  product {
+    comment
+    company_id
+    created_at
+    id
+    name
+    quantity
+    updated_at
+    company {
+      id
+      name
+    }
+  }
+}

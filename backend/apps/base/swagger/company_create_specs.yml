@@ -1,0 +1,28 @@
+Create Company endpoint
+---
+tags:
+  - Companies
+parameters:
+  - in: formData
+    name: name
+    type: string
+    required: true
+definitions:
+  Company:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      created_at:
+        type: dateTime
+      updated_at:
+        type: dateTime
+responses:
+  200:
+    description: The created company
+    schema:
+      $ref: '#/definitions/Company'
+    examples:
+      - {"id": "1", "name": "la empresita", "created_at": "2026-01-19 12:00:00.00000+00", "updated_at": "2026-01-19 12:00:00.00000+00"}

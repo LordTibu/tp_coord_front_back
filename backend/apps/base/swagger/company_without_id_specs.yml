@@ -1,0 +1,28 @@
+Get all Companies endpoint
+---
+tags:
+  - Companies
+definitions:
+  Company:
+    type: object
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      created_at:
+        type: dateTime
+      updated_at:
+        type: dateTime
+  Companies:
+    type: array
+    items:
+      $ref: '#/definitions/Company'
+responses:
+  200:
+    description: A list of Companies
+    schema:
+      $ref: '#/definitions/Companies'
+    examples:
+      - [{"id": "1", "name": "la empresita", "created_at": "2026-01-19 12:00:00.00000+00", "updated_at": "2026-01-19 12:00:00.00000+00"}, {"id": "2", "name": "la empresita 2", "created_at": "2026-01-19 12:00:00.00000+00", "updated_at": "2026-01-19 12:00:00.00000+00"}]
+      - []

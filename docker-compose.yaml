@@ -79,6 +79,21 @@ services:
     networks:
       - course_tp_coord_front_back
 
+  hasura_tp_coord_front_back:
+    container_name: hasura_tp_coord_front_back
+    image: hasura/graphql-engine:latest
+    ports:
+    - 8080:8080
+    depends_on:
+    - db_tp_coord_front_back
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgresql://postgres:postgres@db_tp_coord_front_back:5432/course_fullstack
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
+      HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+    networks:
+      - course_tp_coord_front_back
+
 networks:
   course_tp_coord_front_back:
     name: course_tp_coord_front_back

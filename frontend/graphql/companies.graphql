@@ -1,0 +1,11 @@
+query Companies {
+  company {
+    id
+    name
+    products {
+      id
+      name
+      quantity
+    }
+  }
+}
