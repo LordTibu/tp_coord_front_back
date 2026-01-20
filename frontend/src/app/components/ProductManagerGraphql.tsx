@@ -9,7 +9,7 @@ const hasuraUrl =
   process.env.NEXT_PUBLIC_HASURA_GRAPHQL_URL ?? 'http://localhost:8080/v1/graphql';
 const hasuraWsUrl =
   process.env.NEXT_PUBLIC_HASURA_GRAPHQL_WS_URL ?? hasuraUrl.replace(/^http/, 'ws');
-// Use JWT auth for Hasura requests.
+const hasuraAdminSecret = process.env.NEXT_PUBLIC_HASURA_ADMIN_SECRET;
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:5005';
 
 type ProductItem = ProductsQuery['product'][number];
@@ -89,7 +89,9 @@ export default function ProductManagerGraphql() {
   useEffect(() => {
     if (!authChecked || !isAuthenticated) return;
     const client = new GraphQLClient(hasuraUrl, {
-      headers: jwtToken ? { Authorization: `Bearer ${jwtToken}` } : undefined,
+      headers: hasuraAdminSecret
+        ? { 'x-hasura-admin-secret': hasuraAdminSecret }
+        : undefined,
     });
 
     client
@@ -101,7 +103,7 @@ export default function ProductManagerGraphql() {
         setError(err instanceof Error ? err.message : 'Failed to load products.');
         setIsLoading(false);
       });
-  }, [authChecked, handleProductsUpdate, isAuthenticated, jwtToken]);
+  }, [authChecked, handleProductsUpdate, isAuthenticated]);
 
   useEffect(() => {
     if (!authChecked || !isAuthenticated) return;
@@ -115,8 +117,8 @@ export default function ProductManagerGraphql() {
     };
 
     socket.onopen = () => {
-      const payload = jwtToken
-        ? { headers: { Authorization: `Bearer ${jwtToken}` } }
+      const payload = hasuraAdminSecret
+        ? { headers: { 'x-hasura-admin-secret': hasuraAdminSecret } }
         : undefined;
       sendMessage(payload ? { type: 'connection_init', payload } : { type: 'connection_init' });
     };
@@ -163,7 +165,7 @@ export default function ProductManagerGraphql() {
       }
       socket.close();
     };
-  }, [authChecked, handleProductsUpdate, isAuthenticated, jwtToken]);
+  }, [authChecked, handleProductsUpdate, isAuthenticated]);
 
   return (
     <div className="p-4">
