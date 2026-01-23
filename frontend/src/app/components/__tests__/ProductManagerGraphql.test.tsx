@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ProductManagerGraphql from '../ProductManagerGraphql';
 
@@ -167,13 +167,19 @@ describe('ProductManagerGraphql', () => {
     await screen.findByText('Old Product');
 
     fireEvent.click(screen.getByText('Edit'));
-    fireEvent.change(screen.getByPlaceholderText('Product name'), {
+
+    const editSection = screen.getByText('Update Product').closest('div');
+    if (!editSection) {
+      throw new Error('Edit section not found');
+    }
+    const editScope = within(editSection);
+    fireEvent.change(editScope.getByPlaceholderText('Product name'), {
       target: { value: 'Updated Product' },
     });
-    fireEvent.change(screen.getByPlaceholderText('Comment'), {
+    fireEvent.change(editScope.getByPlaceholderText('Comment'), {
       target: { value: 'New Comment' },
     });
-    fireEvent.change(screen.getByPlaceholderText('Quantity'), {
+    fireEvent.change(editScope.getByPlaceholderText('Quantity'), {
       target: { value: '2' },
     });
 
