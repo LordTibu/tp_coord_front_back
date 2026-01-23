@@ -1,0 +1,135 @@
+{
+  "version": 3,
+  "sources": [
+    {
+      "name": "default",
+      "kind": "postgres",
+      "tables": [
+        {
+          "table": {
+            "name": "Users",
+            "schema": "public"
+          },
+          "object_relationships": [
+            {
+              "name": "company",
+              "using": {
+                "foreign_key_constraint_on": "company_id"
+              }
+            }
+          ]
+        },
+        {
+          "table": {
+            "name": "alembic_version",
+            "schema": "public"
+          }
+        },
+        {
+          "table": {
+            "name": "company",
+            "schema": "public"
+          },
+          "array_relationships": [
+            {
+              "name": "Users",
+              "using": {
+                "foreign_key_constraint_on": {
+                  "column": "company_id",
+                  "table": {
+                    "name": "Users",
+                    "schema": "public"
+                  }
+                }
+              }
+            },
+            {
+              "name": "products",
+              "using": {
+                "foreign_key_constraint_on": {
+                  "column": "company_id",
+                  "table": {
+                    "name": "product",
+                    "schema": "public"
+                  }
+                }
+              }
+            }
+          ],
+          "select_permissions": [
+            {
+              "role": "user",
+              "permission": {
+                "columns": [
+                  "id",
+                  "name"
+                ],
+                "filter": {
+                  "Users": {
+                    "id": {
+                      "_eq": "x-hasura-user-id"
+                    }
+                  }
+                }
+              },
+              "comment": ""
+            }
+          ]
+        },
+        {
+          "table": {
+            "name": "product",
+            "schema": "public"
+          },
+          "object_relationships": [
+            {
+              "name": "company",
+              "using": {
+                "foreign_key_constraint_on": "company_id"
+              }
+            }
+          ],
+          "select_permissions": [
+            {
+              "role": "user",
+              "permission": {
+                "columns": [
+                  "company_id",
+                  "id",
+                  "quantity",
+                  "comment",
+                  "name",
+                  "created_at",
+                  "updated_at"
+                ],
+                "filter": {
+                  "company": {
+                    "Users": {
+                      "id": {
+                        "_eq": "x-hasura-user-id"
+                      }
+                    }
+                  }
+                }
+              },
+              "comment": ""
+            }
+          ]
+        }
+      ],
+      "configuration": {
+        "connection_info": {
+          "database_url": "postgresql://postgres:postgres@db_tp_coord_front_back:5432/course_fullstack",
+          "isolation_level": "read-committed",
+          "pool_settings": {
+            "connection_lifetime": 600,
+            "idle_timeout": 180,
+            "max_connections": 50,
+            "retries": 1
+          },
+          "use_prepared_statements": true
+        }
+      }
+    }
+  ]
+}

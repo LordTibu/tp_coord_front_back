@@ -27,12 +27,21 @@ def _jwt_expires_in() -> int:
 
 def create_access_token(user) -> str:
     now = datetime.now(timezone.utc)
+    role = (user.role or 'user').lower()
+    allowed_roles = ['admin', 'user'] if role == 'admin' else [role]
     payload = {
-        'sub': user.id,
+        'sub': str(user.id),
         'username': user.username,
         'email': user.email,
         'iat': int(now.timestamp()),
         'exp': int((now + timedelta(seconds=_jwt_expires_in())).timestamp()),
+        'https://hasura.io/jwt/claims': {
+            'x-hasura-default-role': role,
+            'x-hasura-allowed-roles': allowed_roles,
+            'x-hasura-user-id': str(user.id),
+            'x-hasura-username': user.username,
+            'x-hasura-email': user.email,
+        }
     }
     return jwt.encode(payload, _jwt_secret(), algorithm=_jwt_algorithm())
 
@@ -53,7 +62,7 @@ def get_current_user_from_token():
     except jwt.PyJWTError:
         return None
     from apps.authentication.models import Users
-    return Users.query.get(payload.get('sub'))
+    return Users.query.get(int(payload.get('sub')))
 
 
 def token_required(fn):
@@ -70,7 +79,7 @@ def token_required(fn):
             return jsonify({'message': 'Invalid token'}), 401
 
         from apps.authentication.models import Users
-        user = Users.query.get(payload.get('sub'))
+        user = Users.query.get(int(payload.get('sub')))
         if not user:
             return jsonify({'message': 'User not found'}), 401
 

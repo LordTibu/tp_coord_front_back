@@ -17,6 +17,7 @@ class Users(db.Model, UserMixin):
     username = db.Column(db.String(64), unique=True)
     email = db.Column(db.String(64), unique=True)
     password = db.Column(db.LargeBinary)
+    role = db.Column(db.String(32), nullable=False, default='user')
 
     # Relationships
     company_id = db.Column(db.Integer, db.ForeignKey('company.id'), nullable=True)
@@ -46,6 +47,7 @@ class Users(db.Model, UserMixin):
             'id': self.id,
             'username': self.username,
             'email': self.email,
+            'role': self.role,
             'company_id': self.company_id,
             'company': self.company.serialize
         }

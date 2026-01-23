@@ -34,6 +34,19 @@ services:
     networks:
       - course_tp_coord_front_back
 
+  db_seed_tp_coord_front_back:
+    container_name: db_seed_tp_coord_front_back
+    build: ./backend
+    command: >
+      python scripts/seed.py
+    env_file:
+      - .env
+    depends_on:
+      db_migration_tp_coord_front_back:
+        condition: service_completed_successfully
+    networks:
+      - course_tp_coord_front_back
+
   backend_tp_coord_front_back:
     build: ./backend
     container_name: backend_tp_coord_front_back
@@ -55,6 +68,8 @@ services:
           path: ./.env
     depends_on:
       db_migration_tp_coord_front_back:
+        condition: service_completed_successfully
+      db_seed_tp_coord_front_back:
         condition: service_completed_successfully
     networks:
       - course_tp_coord_front_back
@@ -91,6 +106,28 @@ services:
       HASURA_GRAPHQL_DATABASE_URL: postgresql://postgres:postgres@db_tp_coord_front_back:5432/course_fullstack
       HASURA_GRAPHQL_ENABLE_CONSOLE: "true"
       HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+      HASURA_GRAPHQL_JWT_SECRET: '{"type":"HS256", "key": "79e0c9117fb94d0e94a1952bd5dda23b"}'
+      HASURA_GRAPHQL_METADATA_DIR: /hasura-metadata
+    volumes:
+      - ./hasura-metadata:/hasura-metadata
+    networks:
+      - course_tp_coord_front_back
+
+  hasura_metadata_apply:
+    container_name: hasura_metadata_apply
+    image: curlimages/curl:8.5.0
+    entrypoint:
+      - /bin/sh
+      - /scripts/apply-hasura-metadata.sh
+    depends_on:
+      db_migration_tp_coord_front_back:
+        condition: service_completed_successfully
+      hasura_tp_coord_front_back:
+        condition: service_started
+    volumes:
+      - ./hasura-metadata/metadata.json:/metadata.json:ro
+      - ./scripts/apply-hasura-metadata.sh:/scripts/apply-hasura-metadata.sh:ro
+    restart: "no"
     networks:
       - course_tp_coord_front_back
 

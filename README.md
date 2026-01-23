@@ -1,3 +1,5 @@
+Nicolas PATINO
+
 # Coordination frontend / backend
 
 ## Contenu du repository

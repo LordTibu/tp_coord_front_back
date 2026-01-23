@@ -60,8 +60,16 @@ class DebugConfig(Config):
     DEBUG = True
 
 
+class TestingConfig(Config):
+    TESTING = True
+    SECRET_KEY = 'test-secret'
+    JWT_SECRET_KEY = 'test-secret'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+
+
 # Load all possible configurations
 config_dict = {
     'Production': ProductionConfig,
-    'Debug': DebugConfig
+    'Debug': DebugConfig,
+    'Testing': TestingConfig
 }
