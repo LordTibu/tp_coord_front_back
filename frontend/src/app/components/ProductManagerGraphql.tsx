@@ -256,6 +256,10 @@ export default function ProductManagerGraphql() {
           return;
         }
 
+        if (!message) {
+          return;
+        }
+
         console.log('WebSocket message received:', message.type, message);
 
         if (message?.type === 'connection_ack') {

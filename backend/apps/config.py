@@ -2,7 +2,11 @@
 import os
 import locale
 
-locale.setlocale(locale.LC_ALL, 'fr_FR.utf8')
+try:
+    locale.setlocale(locale.LC_ALL, 'fr_FR.utf8')
+except locale.Error:
+    # Fallback for CI runners or systems without the French locale installed.
+    locale.setlocale(locale.LC_ALL, 'C')
 
 
 class Config(object):
